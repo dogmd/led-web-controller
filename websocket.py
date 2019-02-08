@@ -9,21 +9,21 @@ import json
 settings_file = 'led-control/settings.json'
 
 async def communicate(websocket, path):
-    data_raw = await websocket.recv()
-    data = json.loads(data_raw)
-    
-    if (data['changeStatus'] == 'true'):
-        # The web interface has been changed, and led-control/settings.json needs to be updated
-        print(f"Recieved new settings:\n{data_raw}")
-        with open(settings_file, 'w') as settings:
-            settings.write(data_raw)
-    else:
-        # Otherwise, the web interface is requesting the current status
-        with open(settings_file, 'r') as settings:
-          status = settings.read()
-        print('Sending status to web interface...', end='')
-        await websocket.send(status)
-        print('done')
+    while True:
+        data_raw = await websocket.recv()
+        data = json.loads(data_raw)
+        if (data['changeStatus']):
+            # The web interface has been changed, and led-control/settings.json needs to be updated
+            print(f"Recieved new settings:\n{data_raw}")
+            with open(settings_file, 'w') as settings:
+                settings.write(data_raw)
+        else:
+            # Otherwise, the web interface is requesting the current status
+            with open(settings_file, 'r') as settings:
+              status = settings.read()
+            print('Sending status to web interface...', end='')
+            await websocket.send(status)
+            print('done')
 
 start_server = websockets.serve(communicate, 'localhost', 8765)
 

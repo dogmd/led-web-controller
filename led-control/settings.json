@@ -1,3 +1,1 @@
-{
-"changeStatus": "true"
-}
+{"changeStatus":true,"effects":{"solid-color":{"selected":"true","red":"251","green":"238","blue":"228"},"rainbow":{"selected":"","frequency":"3","speed":"8","solid-strip":"false"},"snow":{"selected":"","frequency":"0.5","gravity":"2"},"runner":{"selected":"","speed":"30","length":"25","red":"120","green":"81","blue":"169"},"wipe":{"selected":"","speed":"30","red":"120","green":"81","blue":"169"},"custom":{"selected":""},"twinkle":{"selected":"false","frequency":"0.5"},"breathe":{"selected":"false","speed":"1"},"blink":{"selected":"false","off-time":"0.3","on-time":"0.5"}},"powerSettings":{"isOn":"false","brightness":"83"}}
