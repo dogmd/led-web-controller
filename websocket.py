@@ -25,7 +25,7 @@ async def communicate(websocket, path):
             await websocket.send(status)
             print('done')
 
-start_server = websockets.serve(communicate, 'localhost', 8765)
+start_server = websockets.serve(communicate, '192.168.8.158', 8765)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
