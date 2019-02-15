@@ -28,7 +28,6 @@ class EffectController:
 		for effect in self.effects:
 			effect[0](effect[1], self.time, self.pixels) # effect[0] is callback, effect[1] is effect settings
 		self.apply_brightness()
-		print(self.pixels)
 		self.time += 1
 
 	def apply_brightness(self):
