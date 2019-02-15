@@ -1,25 +1,25 @@
-import effects
+import led_control.effects as effects
 import json
 import colorsys
 
 class EffectController:
 	def __init__(self, num_pixels):
-		self.effects = []
 		self.import_settings()
+		self.pixels = []
 		for i in range(num_pixels):
 			self.pixels.append((0, 0, 0))
 		self.time = 0
 
 	def import_settings(self):
-		with open('settings.json', 'r') as settings:
+		self.effects = []
+		with open('led_control/settings.json', 'r') as settings:
 			data = settings.read()
 		self.settings = json.loads(data)
 
 		for effect_name, effect_settings in self.settings['effects'].items():
-			if (effect_settings['selected'] == 'true'):
+			if (bool(effect_settings['selected'])):
 				self.effects.append((effects.lookup(effect_name), effect_settings))
 
-		self.pixels = []
 		self.brightness = float(self.settings['powerSettings']['brightness']) / 100
 		if (self.settings['powerSettings']['isOn'] == 'false'):
 			self.brightness = 0

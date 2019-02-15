@@ -8,6 +8,10 @@ def lookup(name):
 		return solid
 	elif (name == 'rainbow'):
 		return rainbow
+	elif (name == 'snow'):
+		return snow
+	else:
+		return solid
 
 def fill(pixels, color):
 	for ind in range(len(pixels)):
