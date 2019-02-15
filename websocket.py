@@ -7,7 +7,6 @@ import websockets
 import json
 
 settings_file = 'led-control/settings.json'
-serverIP = 'localhost'
 
 async def communicate(websocket, path):
     while True:
@@ -26,7 +25,7 @@ async def communicate(websocket, path):
             await websocket.send(status)
             print('done')
 
-start_server = websockets.serve(communicate, serverIP, 8765)
+start_server = websockets.serve(communicate, '', 8765)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
