@@ -15,3 +15,6 @@ def main():
 		dots = effect.pixels
 		dots.show()
 		time.sleep(delay)
+
+def update():
+	ec.import_settings()

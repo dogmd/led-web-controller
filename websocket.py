@@ -5,6 +5,7 @@
 import asyncio
 import websockets
 import json
+import led-control.led_relay as controller
 
 settings_file = 'led-control/settings.json'
 
@@ -17,6 +18,7 @@ async def communicate(websocket, path):
             print(f"Recieved new settings:\n{data_raw}")
             with open(settings_file, 'w') as settings:
                 settings.write(data_raw)
+			controller.update()
         else:
             # Otherwise, the web interface is requesting the current status
             with open(settings_file, 'r') as settings:
@@ -25,6 +27,7 @@ async def communicate(websocket, path):
             await websocket.send(status)
             print('done')
 
+controller.main()
 start_server = websockets.serve(communicate, '', 8765)
 
 asyncio.get_event_loop().run_until_complete(start_server)
