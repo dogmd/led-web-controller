@@ -4,6 +4,7 @@ import random
 tps = 20
 
 def lookup(name):
+	print(name)
 	if (name == 'solid-color'):
 		return solid
 	elif (name == 'rainbow'):
@@ -11,7 +12,10 @@ def lookup(name):
 	elif (name == 'snow'):
 		return snow
 	else:
-		return solid
+		return red
+
+def red(settings, time, pixels):
+	fill(pixels, (255, 0, 0))
 
 def fill(pixels, color):
 	for ind in range(len(pixels)):
@@ -23,8 +27,7 @@ def solid(settings, time, pixels):
 
 def rainbow(settings, time, pixels):
 	tpt = tps / int(settings['speed']) # ticks per trigger
-	print(pixels[0])
-	if (bool(settings['solid-strip'])):
+	if (settings['solid-strip'] == 'true'):
 		tpt /= 4 # Trigger more often to make rainbow smoother
 		if (time % tpt == 0):
 			curr_color = tuple(c / 255 for c in pixels[0])
@@ -42,9 +45,9 @@ def rainbow(settings, time, pixels):
 			pixels[ind] = rgb
 
 def snow(settings, time, pixels):
-	num_ticks = tps * settings['duration']
+	num_ticks = tps * int(settings['duration'])
 	tpt = 254 // num_ticks
-	threshold = (int(settings['frequency']) / 100) / 4 # Max probability is 25%
+	threshold = float(settings['frequency']) / 4 # Max probability is 25%
 	for ind in range(len(pixels)):
 		color = pixels[ind]
 		r = int(color[0])
@@ -52,7 +55,6 @@ def snow(settings, time, pixels):
 		b = int(color[2])
 		if (r == b and b == g and r != 0):
 			if (time % tpt == 0):
-				print(r)
 				# If current "brightness" value is even, that means its dimming, if its odd it is brightening
 				if (r % 2 == 0):
 					pixels[ind] = (r - 2, g - 2, b - 2)
