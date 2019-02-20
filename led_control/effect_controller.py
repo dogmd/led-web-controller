@@ -1,9 +1,10 @@
-import effects as effects
+import led_control.effects as effects
 import json
 import colorsys
 
 class EffectController:
-	def __init__(self, num_pixels):
+	def __init__(self, num_pixels, settings_file='led_control/settings.json'):
+		self.settings_file = settings_file
 		self.import_settings()
 		self.pixels = []
 		for i in range(num_pixels):
@@ -12,7 +13,7 @@ class EffectController:
 
 	def import_settings(self):
 		self.effects = []
-		with open('settings.json', 'r') as settings:
+		with open(self.settings_file, 'r') as settings:
 			data = settings.read()
 		print(data)
 		self.settings = json.loads(data)
