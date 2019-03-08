@@ -26,23 +26,24 @@ def solid(settings, time, pixels):
 	fill(pixels, color)
 
 def rainbow(settings, time, pixels):
-	tpt = tps / int(settings['speed']) # ticks per trigger
-	if (settings['solid-strip'] == 'true'):
-		tpt /= 4 # Trigger more often to make rainbow smoother
-		if (time % tpt == 0):
-			curr_color = tuple(c / 255 for c in pixels[0])
-			curr_color = colorsys.rgb_to_hls(*curr_color)
-			new_color = ((curr_color[0] + 1 / 360) % 1, 0.5, 1)
-			new_color = tuple(c * 255 for c in colorsys.hls_to_rgb(*new_color))
-			fill(pixels, new_color)
+	speed = int(settings['speed'])
+	hue_diff = int(settings['frequency']) / len(pixels) # The difference in hue from pixel n and n - 1
+	if (speed != 0):
+		spx = 1 / int(settings['speed']) # seconds / pixel
+		hpt = hue_diff / spx / tps # hue per tick
 	else:
-		pos = (time // tpt) % len(pixels)
-		step = int(settings['frequency']) / len(pixels)
+		hpt = 0 
+
+	if (settings['solid-strip'] == 'true'):
+		hue = (hpt * time) % 1
+		rgb = tuple(c * 255 for c in colorsys.hls_to_rgb(hue, 0.5, 1))
+		fill(pixels, rgb)
+	else:
+		first = hpt * time
 		for i in range(len(pixels)):
-			ind = int(i + pos) % len(pixels)
-			hue = (i * step) % 1
+			hue = (first + hue_diff * i) % 1
 			rgb = tuple(c * 255 for c in colorsys.hls_to_rgb(hue, 0.5, 1))
-			pixels[ind] = rgb
+			pixels[i] = rgb
 
 def snow(settings, time, pixels):
 	num_ticks = tps * int(settings['duration'])
@@ -53,18 +54,19 @@ def snow(settings, time, pixels):
 		r = int(color[0])
 		g = int(color[1])
 		b = int(color[2])
-		if (r == b and b == g and r != 0):
-			if (time % tpt == 0):
-				# If current "brightness" value is even, that means its dimming, if its odd it is brightening
-				if (r % 2 == 0):
-					pixels[ind] = (r - 2, g - 2, b - 2)
-				else:
-					if (r == 253):
-						pixels[ind] = (254, 254, 254)
+		if (time % tpt == 0):
+			if (r == b and b == g and r != 0):
+					print(pixels[ind])
+					# If current "brightness" value is even, that means its dimming, if its odd it is brightening
+					if (r % 2 == 0):
+						pixels[ind] = (r - 2, g - 2, b - 2)
 					else:
-						pixels[ind] = (r + 2, g + 2, b + 2)
-		else:
-			pixels[ind] = (0, 0, 0)
-			rand = random.random()
-			if (rand < threshold):
-				pixels[ind] = (1, 1, 1) # Make it a snowflake
+						if (r == 253):
+							pixels[ind] = (254, 254, 254)
+						else:
+							pixels[ind] = (r + 2, g + 2, b + 2)
+			else:
+				pixels[ind] = (0, 0, 0)
+				rand = random.random()
+				if (rand < threshold):
+					pixels[ind] = (1, 1, 1) # Make it a snowflake

@@ -6,6 +6,7 @@ class EffectController:
 	def __init__(self, num_pixels, settings_file='led_control/settings.json'):
 		self.settings_file = settings_file
 		self.import_settings()
+		print(self.settings)
 		self.pixels = []
 		for i in range(num_pixels):
 			self.pixels.append((0, 0, 0))
@@ -15,7 +16,6 @@ class EffectController:
 		self.effects = []
 		with open(self.settings_file, 'r') as settings:
 			data = settings.read()
-		print(data)
 		self.settings = json.loads(data)
 
 		for effect_name, effect_settings in self.settings['effects'].items():
