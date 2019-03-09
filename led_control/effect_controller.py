@@ -1,24 +1,29 @@
 import led_control.effects as effects
 import json
 import colorsys
+import time
+
+DELAY = 0.05
 
 class EffectController:
 	def __init__(self, num_pixels, settings_file='led_control/settings.json'):
 		self.settings_file = settings_file
-		self.import_settings()
-		print(self.settings)
 		self.pixels = []
 		for i in range(num_pixels):
 			self.pixels.append((0, 0, 0))
 		self.time = 0
+		self.import_settings()
+		print(self.settings)
 
 	def import_settings(self):
 		self.effects = []
+		self.pixel_settings = [0] * len(self.pixels)
 		with open(self.settings_file, 'r') as settings:
 			data = settings.read()
 		self.settings = json.loads(data)
 
 		for effect_name, effect_settings in self.settings['effects'].items():
+			effect_settings['tps'] = 1 / DELAY
 			if (effect_settings['selected'] == 'true'):
 				self.effects.append((effects.lookup(effect_name), effect_settings))
 
@@ -28,12 +33,13 @@ class EffectController:
 
 	def step(self):
 		for effect in self.effects:
-			effect[0](effect[1], self.time, self.pixels) # effect[0] is callback, effect[1] is effect settings
+			effect[0](effect[1], self.time, self.pixels, self.pixel_settings) # effect[0] is callback, effect[1] is effect settings
 		self.apply_brightness()
 		for ind in range(len(self.pixels)):
 			color = self.pixels[ind]
 			color = tuple(int(c) for c in color)
 			self.pixels[ind] = color
+		time.sleep(DELAY)
 		self.time += 1
 
 	def apply_brightness(self):

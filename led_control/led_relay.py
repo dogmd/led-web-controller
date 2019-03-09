@@ -8,7 +8,6 @@ dots = dotstar.DotStar(board.SCK, board.MOSI, 200, brightness=1, auto_write=Fals
 #dots = dotstar.DotStar(board.D26, board.D19, 200, brightness=1, auto_write=False)
 n_dots = len(dots)
 effect_controller = ec.EffectController(n_dots)
-delay = 0.05
 
 def main():
 	effect_controller.step()
@@ -16,7 +15,6 @@ def main():
 		dots[ind] = effect_controller.pixels[ind]
 	#print(dots[0])
 	dots.show()
-	time.sleep(delay)
 
 def update_settings():
 	effect_controller.import_settings()
