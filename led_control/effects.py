@@ -11,11 +11,13 @@ def lookup(name):
 		return snow
 	elif (name == 'runner'):
 		return runner
+	elif (name == 'patriot'):
+		return patriot
 	else:
-		return red
+		return magenta
 
-def red(settings, time, pixels):
-	fill(pixels, (255, 0, 0))
+def magenta(settings, time, pixels, pixel_settings):
+	fill(pixels, (255, 0, 255))
 
 def fill(pixels, color):
 	for i in range(len(pixels)):
@@ -83,3 +85,29 @@ def runner(settings, time, pixels, pixel_settings):
 				pixels[i] = color
 		else:
 			pixels[i] = (0, 0, 0)
+
+def patriot(settings, time, pixels, pixel_settings):
+	speed = int(settings['speed'])
+	if (speed != 0):
+		tpt = 1 / int(settings['speed']) * int(settings['tps'])
+		pos = (time // tpt) % len(pixels)
+	else:
+		pos = 0
+	strand_length = int(settings['strand-length'])
+
+	for i in range(len(pixels)):
+		relative_pos = (i + pos) % len(pixels)
+		if (settings['solid-strand'] == 'true'):
+			if (relative_pos // strand_length % 3 == 0):
+				pixels[i] = (255, 0, 0)
+			if (relative_pos // strand_length % 3 == 1):
+				pixels[i] = (255, 255, 255)
+			if (relative_pos // strand_length % 3 == 2):
+				pixels[i] = (0, 0, 255)
+		else:
+			if (relative_pos % 3 == 0):
+				pixels[i] = (255, 0, 0)
+			if (relative_pos % 3 == 1):
+				pixels[i] = (255, 255, 255)
+			if (relative_pos % 3 == 2):
+				pixels[i] = (0, 0, 255)
