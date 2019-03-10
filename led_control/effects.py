@@ -13,6 +13,8 @@ def lookup(name):
 		return runner
 	elif (name == 'patriot'):
 		return patriot
+	elif (name == 'custom'):
+		return custom
 	else:
 		return magenta
 
@@ -111,3 +113,18 @@ def patriot(settings, time, pixels, pixel_settings):
 				pixels[i] = (255, 255, 255)
 			if (relative_pos % 3 == 2):
 				pixels[i] = (0, 0, 255)
+
+def custom(settings, time, pixels, pixel_settings):
+	if ('colors' in settings):
+		colors = settings['colors']
+		segments = []
+		strand_length = int(settings['strand-length'])
+		for i in range(len(colors)):
+			color = int(colors[i], 16)
+			rgb = (color >> 16, color >> 8 & 0xFF, color & 0xFF) 
+			segments.append(rgb)
+
+		for i in range(len(pixels)):
+			pixels[i] = segments[i // strand_length]
+	else:
+		fill(pixels, (0, 0, 0))
