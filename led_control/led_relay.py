@@ -1,6 +1,6 @@
 import time
 import board
-import adafruit_dotstar as dotstar
+import led_control.adafruit_dotstar as dotstar
 import led_control.effect_controller as ec
 
 # Using a DotStar Digital LED Strip with 30 LEDs connected to digital pins
@@ -13,8 +13,10 @@ def main():
 	effect_controller.step()
 	for ind in range(n_dots):
 		dots[ind] = effect_controller.pixels[ind]
-	#print(dots[0])
-	dots.show()
+	try:
+		dots.show()
+	except(TimeoutError):
+		print('SPI interface timed out...continuing')	
 
 def update_settings():
 	effect_controller.import_settings()

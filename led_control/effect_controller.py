@@ -17,7 +17,9 @@ class EffectController:
 
 	def import_settings(self):
 		self.effects = []
-		self.pixel_settings = [0] * len(self.pixels)
+		self.pixel_settings = []
+		for i in range(len(self.pixels)):
+			self.pixel_settings.append({})
 		with open(self.settings_file, 'r') as settings:
 			data = settings.read()
 		self.settings = json.loads(data)
@@ -38,7 +40,7 @@ class EffectController:
 		self.apply_brightness()
 		for ind in range(len(self.pixels)):
 			color = self.pixels[ind]
-			color = tuple(int(c) for c in color)
+			color = tuple(int(c) % 256 for c in color)
 			self.pixels[ind] = color
 		time.sleep(DELAY)
 		self.time += 1
