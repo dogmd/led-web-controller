@@ -82,19 +82,23 @@ def snow(settings, time, pixels, pixel_settings):
 			else:
 				pixels[i] = (0, 0, 0)
 
-def runner(settings, time, pixels, pixel_settings):
+def runner(settings, time, pixels, pixel_settings, overwrite=True):
 	color = (int(settings['red']), int(settings['green']), int(settings['blue']))
 	tpt = 1 / int(settings['speed']) * int(settings['tps'])
 	length = int(settings['length'])
 	head = (time // tpt) % len(pixels)
 	tail = (head - length + len(pixels)) % len(pixels)
 	for i in range(len(pixels)):
+		pixel_settings[i]['runner'] = pixels[i]
 		if (tail > head and (i > tail or i <= head)):
 				pixels[i] = color
 		elif (tail <= head and (i > tail and i <= head)):
 				pixels[i] = color
 		else:
-			pixels[i] = (0, 0, 0)
+			if (overwrite):
+				pixels[i] = (0, 0, 0)
+			else:
+				pixels[i] = pixel_settings[i]['runner']
 
 def patriot(settings, time, pixels, pixel_settings):
 	speed = int(settings['speed'])
@@ -138,21 +142,24 @@ def custom(settings, time, pixels, pixel_settings):
 		fill(pixels, (0, 0, 0))
 
 def wipe(settings, time, pixels, pixel_settings):
-	tpt = 1 / int(settings['speed']) * int(settings['tps'])
-	pos = int((time // tpt) % len(pixels))
-	color = (int(settings['red']), int(settings['green']), int(settings['blue']))
-	if ('wipe' not in pixel_settings[-1]): # Grow the color wipe
-		for i in range(pos + 1):
-			pixel_settings[i]['wipe'] = pixels[i]
-			pixels[i] = color
-	else: # Shrink the color wipe
-		for i in range(len(pixels)):
-			if (i <= pos):
-				if ('wipe' in pixel_settings[i]):
-					old_color = pixel_settings[i].pop('wipe')
-					pixels[i] = old_color
-			else:
+	if (settings['full-strip'] == 'true'):
+		tpt = 1 / int(settings['speed']) * int(settings['tps'])
+		pos = int((time // tpt) % len(pixels))
+		color = (int(settings['red']), int(settings['green']), int(settings['blue']))
+		if ('wipe' not in pixel_settings[-1]): # Grow the color wipe
+			for i in range(pos + 1):
+				pixel_settings[i]['wipe'] = pixels[i]
 				pixels[i] = color
+		else: # Shrink the color wipe
+			for i in range(len(pixels)):
+				if (i <= pos):
+					if ('wipe' in pixel_settings[i]):
+						old_color = pixel_settings[i].pop('wipe')
+						pixels[i] = old_color
+				else:
+					pixels[i] = color
+	else:
+		runner(settings, time, pixels, pixel_settings, False)
 
 def twinkle(settings, time, pixels, pixel_settings, duration=1, full_strip=False):
 	num_ticks = int(settings['tps']) * duration
