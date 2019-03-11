@@ -202,7 +202,7 @@ def twinkle(settings, time, pixels, pixel_settings, duration=1, full_strip=False
 				pixel_settings[i]['twinkle'] = 0
 
 def breathe(settings, time, pixels, pixel_settings):
-	twinkle(settings, time, pixels, pixel_settings, 1 / int(settings['speed']), True)
+	twinkle(settings, time, pixels, pixel_settings, 1 / float(settings['speed']), True)
 
 def blink(settings, time, pixels, pixel_settings):
 	off_ticks = float(settings['off-time']) * int(settings['tps'])
