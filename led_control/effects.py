@@ -19,6 +19,10 @@ def lookup(name):
 		return wipe
 	elif (name == 'twinkle'):
 		return twinkle
+	elif (name == 'breathe'):
+		return breathe
+	elif (name == 'blink'):
+		return blink
 	else:
 		return magenta
 
@@ -150,15 +154,20 @@ def wipe(settings, time, pixels, pixel_settings):
 			else:
 				pixels[i] = color
 
-def twinkle(settings, time, pixels, pixel_settings):
-	num_ticks = int(settings['tps'])
-	threshold = float(settings['frequency']) / num_ticks
+def twinkle(settings, time, pixels, pixel_settings, duration=1, full_strip=False):
+	num_ticks = int(settings['tps']) * duration
+	threshold = 1 # trigger on every pixel
+	if (not full_strip):
+		threshold = float(settings['frequency']) / num_ticks
 	for i in range(len(pixels)):
 		if ('twinkle' in pixel_settings[i]):
 			if ('twinkle_diff' not in pixel_settings[i]):
 				rgb = tuple(c / 255 for c in pixels[i])
 				brightness = colorsys.rgb_to_hls(*rgb)[1]
 				pixel_settings[i]['twinkle_diff'] = (1 - brightness) / num_ticks * 2
+				if (brightness == 0):
+					pixel_settings[i].pop('twinkle')
+					pixel_settings[i].pop('twinkle_diff')
 			else:
 				pixel_settings[i]['twinkle'] += 1
 				brightness_diff = pixel_settings[i]['twinkle_diff']
@@ -185,3 +194,19 @@ def twinkle(settings, time, pixels, pixel_settings):
 			if (rand < threshold):
 				pixel_settings[i]['twinkle'] = 0
 
+def breathe(settings, time, pixels, pixel_settings):
+	twinkle(settings, time, pixels, pixel_settings, 1 / int(settings['speed']), True)
+
+def blink(settings, time, pixels, pixel_settings):
+	off_ticks = float(settings['off-time']) * int(settings['tps'])
+	on_ticks = float(settings['on-time']) * int(settings['tps'])
+	if ('blink' in pixel_settings[0]): # Strip is off
+		if (time >= pixel_settings[0]['blink'] + off_ticks):
+			pixel_settings[0].pop('blink')
+		else:
+			for i in range(len(pixels)):
+				pixels[i] = (0, 0, 0)
+
+	else:
+		if (time % on_ticks == 0):
+			pixel_settings[0]['blink'] = time
