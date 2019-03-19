@@ -62,18 +62,24 @@ def snow(settings, time, pixels, pixel_settings):
 	num_ticks = int(settings['tps']) * int(settings['duration'])
 	brightness_diff = 510 / num_ticks
 	threshold = float(settings['frequency']) / num_ticks
-	
+	color = (int(settings['red']), int(settings['green']), int(settings['blue']))
+	color = tuple(c / 255 for c in color)
+	hls = colorsys.rgb_to_hls(color)
+
 	for i in range(len(pixels)):
 		if ('snow' in pixel_settings[i]):
 			pixel_settings[i]['snow'] += 1
+			brightness = 0
 			if (pixel_settings[i]['snow'] < num_ticks / 2):
-				brightness = brightness_diff * pixel_settings[i]['snow']
-				pixels[i] = (brightness, brightness, brightness)
+				brightness = brightness_diff * pixel_settings[i]['snow'] / 255
 			elif (pixel_settings[i]['snow'] < num_ticks):
-				brightness = brightness_diff * (num_ticks - pixel_settings[i]['snow'])
-				pixels[i] = (brightness, brightness, brightness)
+				brightness = brightness_diff * (num_ticks - pixel_settings[i]['snow']) / 255
 			else:
 				pixel_settings[i].pop('snow')
+			new_hls = (hls[0], brightness, hls[2])
+			new_color = colorsys.hls_to_rgb(new_hls)
+			new_color = tuple(c * 255 for c in new_color)
+			pixels[i] = new_color
 		else:
 			rand = random.random()
 			if (rand < threshold):
