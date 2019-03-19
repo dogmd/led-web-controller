@@ -26,7 +26,7 @@ class EffectController:
 
 		for effect_name, effect_settings in self.settings['effects'].items():
 			effect_settings['tps'] = 1 / DELAY
-			effect_settings['strand-length'] = 10
+			effect_settings['strand-length'] = 20
 			if (effect_settings['selected'] == 'true'):
 				self.effects.append((effects.lookup(effect_name), effect_settings))
 

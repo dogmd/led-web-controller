@@ -155,14 +155,13 @@ def custom(settings, time, pixels, pixel_settings):
 	if ('colors' in settings):
 		colors = settings['colors']
 		segments = []
-		strand_length = int(settings['strand-length'])
 		for i in range(len(colors)):
 			color = int(colors[i], 16)
 			rgb = (color >> 16, color >> 8 & 0xFF, color & 0xFF) 
 			segments.append(rgb)
 
 		for i in range(len(pixels)):
-			pixels[i] = segments[i // strand_length]
+			pixels[i] = segments[int(i / len(pixels) * len(segments))]
 	else:
 		fill(pixels, (0, 0, 0))
 
