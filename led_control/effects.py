@@ -58,33 +58,52 @@ def rainbow(settings, time, pixels, pixel_settings):
 			rgb = tuple(c * 255 for c in colorsys.hls_to_rgb(hue, 0.5, 1))
 			pixels[i] = rgb
 
-def snow(settings, time, pixels, pixel_settings):
+def snow(settings, time, pixels, pixel_settings, twinkle=False, full_strip=False):
 	num_ticks = int(settings['tps']) * int(settings['duration'])
-	brightness_diff = 510 / num_ticks
-	threshold = float(settings['frequency']) / num_ticks
-	color = (int(settings['red']), int(settings['green']), int(settings['blue']))
-	color = tuple(c / 255 for c in color)
-	hls = colorsys.rgb_to_hls(color)
+	threshold = 0
+	if (not full_strip):
+		threshold = float(settings['frequency']) / num_ticks
+	color = (0, 0, 0)
+	hls = (0, 0, 0)
+	if (not twinkle):
+		brightness_diff = 2 / num_ticks
+		color = (int(settings['red']), int(settings['green']), int(settings['blue']))
+		color = tuple(c / 255 for c in color)
+		hls = colorsys.rgb_to_hls(*color)
+	if (full_strip):
+		brightness_diff = (1 - hls[1]) / num_ticks
 
 	for i in range(len(pixels)):
+		if (twinkle):
+			color = pixels[i]
+			brightness_diff = 2 / num_ticks
+			color = tuple(c / 255 for c in color)
+			hls = colorsys.rgb_to_hls(*color)
 		if ('snow' in pixel_settings[i]):
 			pixel_settings[i]['snow'] += 1
 			brightness = 0
 			if (pixel_settings[i]['snow'] < num_ticks / 2):
-				brightness = brightness_diff * pixel_settings[i]['snow'] / 255
+				brightness = brightness_diff * pixel_settings[i]['snow']
 			elif (pixel_settings[i]['snow'] < num_ticks):
-				brightness = brightness_diff * (num_ticks - pixel_settings[i]['snow']) / 255
+				brightness = brightness_diff * (num_ticks - pixel_settings[i]['snow'])
 			else:
 				pixel_settings[i].pop('snow')
+			if (brightness >= 1):
+				brightness = 1 - brightness_diff
+			if (brightness <= 0):
+				brightness = brightness_diff
 			new_hls = (hls[0], brightness, hls[2])
-			new_color = colorsys.hls_to_rgb(new_hls)
+			new_color = colorsys.hls_to_rgb(*new_hls)
 			new_color = tuple(c * 255 for c in new_color)
 			pixels[i] = new_color
 		else:
 			rand = random.random()
-			if (rand < threshold):
+			if (rand < threshold or full_strip):
 				pixel_settings[i]['snow'] = 1
-				pixels[i] = tuple(c + brightness_diff for c in pixels[i])
+				if (twinkle):
+					pixels[i] = (0, 0, 0)
+				else:
+					pixels[i] = tuple(c + brightness_diff for c in pixels[i])
 			else:
 				pixels[i] = (0, 0, 0)
 
@@ -168,44 +187,8 @@ def wipe(settings, time, pixels, pixel_settings):
 		runner(settings, time, pixels, pixel_settings, False)
 
 def twinkle(settings, time, pixels, pixel_settings, duration=1, full_strip=False):
-	num_ticks = int(settings['tps']) * duration
-	threshold = 1 # trigger on every pixel
-	if (not full_strip):
-		threshold = float(settings['frequency']) / num_ticks
-	for i in range(len(pixels)):
-		if ('twinkle' in pixel_settings[i]):
-			if ('twinkle_diff' not in pixel_settings[i]):
-				rgb = tuple(c / 255 for c in pixels[i])
-				brightness = colorsys.rgb_to_hls(*rgb)[1]
-				pixel_settings[i]['twinkle_diff'] = (1 - brightness) / num_ticks * 2
-				if (brightness == 0):
-					pixel_settings[i].pop('twinkle')
-					pixel_settings[i].pop('twinkle_diff')
-			else:
-				pixel_settings[i]['twinkle'] += 1
-				brightness_diff = pixel_settings[i]['twinkle_diff']
-				tick_pos = pixel_settings[i]['twinkle']
-				rgb = tuple(c / 255 for c in pixels[i])
-				hls = colorsys.rgb_to_hls(*rgb)
-				brightness_offset = 0
-
-				if (tick_pos < num_ticks / 2):
-					brightness_offset = brightness_diff * tick_pos
-				elif (tick_pos < num_ticks):
-					brightness_offset = brightness_diff * (num_ticks - tick_pos)
-				else:
-					pixel_settings[i].pop('twinkle')
-					pixel_settings[i].pop('twinkle_diff')
-
-				new_brightness = hls[1] + brightness_offset
-				if (new_brightness >= 1): # For some reason, the color distinctly changes with brightness 1, so avoid that
-					new_brightness = new_brightness - brightness_diff
-				hls = (hls[0], new_brightness, hls[2])
-				pixels[i] = tuple(c * 255 for c in colorsys.hls_to_rgb(*hls))
-		else:
-			rand = random.random()
-			if (rand < threshold):
-				pixel_settings[i]['twinkle'] = 0
+	settings['duration'] = '1'
+	snow(settings, time, pixels, pixel_settings, True, full_strip)
 
 def breathe(settings, time, pixels, pixel_settings):
 	twinkle(settings, time, pixels, pixel_settings, 1 / float(settings['speed']), True)
