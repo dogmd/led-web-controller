@@ -40,12 +40,7 @@ def solid(settings, time, pixels, pixel_settings):
 def rainbow(settings, time, pixels, pixel_settings):
 	speed = int(settings['speed'])
 	hue_diff = int(settings['frequency']) / len(pixels) # The difference in hue from pixel n and n - 1
-	
-	if (speed != 0):
-		spx = 1 / int(settings['speed']) # seconds / pixel
-		hpt = hue_diff / spx / int(settings['tps']) # hue per tick
-	else:
-		hpt = 0 
+	hpt = hue_diff * speed / int(settings['tps']) # hue per tick
 
 	if (settings['solid-strip'] == 'true'):
 		hue = (hpt * time) % 1
@@ -59,7 +54,7 @@ def rainbow(settings, time, pixels, pixel_settings):
 			pixels[i] = rgb
 
 def snow(settings, time, pixels, pixel_settings, twinkle=False, full_strip=False):
-	num_ticks = int(settings['tps']) * int(settings['duration'])
+	num_ticks = int(settings['tps']) * float(settings['duration'])
 	threshold = 0
 	if (not full_strip):
 		threshold = float(settings['frequency']) / num_ticks
@@ -186,7 +181,8 @@ def wipe(settings, time, pixels, pixel_settings):
 		runner(settings, time, pixels, pixel_settings, False)
 
 def twinkle(settings, time, pixels, pixel_settings, duration=1, full_strip=False):
-	settings['duration'] = '1'
+	if (full_strip):
+		settings['duration'] = duration
 	snow(settings, time, pixels, pixel_settings, True, full_strip)
 
 def breathe(settings, time, pixels, pixel_settings):
