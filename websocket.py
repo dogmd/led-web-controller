@@ -1,8 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# I really have no idea what I'm doing. This should be rewritten
 import asyncio
 import websockets
 import json
 import time
+import ssl
 import led_control.led_relay as leds
 
 settings_file = 'led_control/settings.json'
@@ -28,8 +30,13 @@ async def communicate(websocket, path):
 	except websockets.exceptions.ConnectionClosed:
 		print('connection to client closed')
 
-web_interface = websockets.serve(communicate, '', 8765)
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain('/etc/letsencrypt/live/pi.69craft.com/fullchain.pem', '/etc/letsencrypt/live/pi.69craft.com/privkey.pem')
+web_interface = websockets.serve(communicate, '', 8888, ssl=ssl_context)
 
 while True:
-	asyncio.get_event_loop().run_until_complete(web_interface)
+	try:
+		asyncio.get_event_loop().run_until_complete(web_interface)
+	except Exception:
+		pass
 	leds.main()
