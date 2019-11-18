@@ -1,7 +1,7 @@
 import time
 import board
-import led_control.adafruit_dotstar as dotstar
-import led_control.effect_controller as ec
+import adafruit_dotstar as dotstar
+import effect_controller as ec
 
 # Using a DotStar Digital LED Strip with 30 LEDs connected to digital pins
 dots = dotstar.DotStar(board.SCK, board.MOSI, 82, brightness=1, auto_write=False)

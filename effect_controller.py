@@ -1,4 +1,4 @@
-import led_control.effects as effects
+import effects
 import json
 import colorsys
 import time
@@ -6,7 +6,7 @@ import time
 DELAY = 0.005
 
 class EffectController:
-    def __init__(self, num_pixels, settings_file='led_control/settings.json'):
+    def __init__(self, num_pixels, settings_file='settings.json'):
         self.settings_file = settings_file
         self.pixels = []
         for i in range(num_pixels):
