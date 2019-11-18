@@ -10,13 +10,13 @@ n_dots = len(dots)
 effect_controller = ec.EffectController(n_dots)
 
 def main():
-	effect_controller.step()
-	for ind in range(n_dots):
-		dots[ind] = effect_controller.pixels[ind]
-	try:
-		dots.show()
-	except(TimeoutError):
-		print('SPI interface timed out...continuing')	
+    effect_controller.step()
+    for ind in range(n_dots):
+        dots[ind] = effect_controller.pixels[ind]
+    try:
+        dots.show()
+    except(TimeoutError):
+        print('SPI interface timed out...continuing')   
 
 def update_settings():
-	effect_controller.import_settings()
+    effect_controller.import_settings()
