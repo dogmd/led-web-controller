@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from flask import Flask, request, jsonify
+from flask import *
 import json
 import multiprocessing
 import led_relay
@@ -23,10 +23,15 @@ queue = multiprocessing.Queue()
 leds = multiprocessing.Process(target=led_interface, args=(queue,))
 leds.start()
 
-@app.route('/settings', methods=['GET'])
-def get_settings():
-	with open('settings.json', 'r') as settings:
-		return settings.read(), 200
+@app.route('/settings/<effect_name>', methods=['GET'])
+def get_settings(effect_name):
+    if (effect_name == 'all'):
+        with open('settings.json', 'r') as settings:
+            data = settings.read()
+        return Response(response=data, status=200, mimetype='application/json')
+    else:
+        return jsonify(led_relay.effect_controller.settings['effects'][effect_name]), 200
+        
 
 @app.route('/settings', methods=['PUT', 'POST'])
 def set_settings():
@@ -36,10 +41,10 @@ def set_settings():
         settings.write(new_settings)
     # Tell the led worker to update its settings
     queue.put('update')
+    # Get currently enabled effects
     effects = map(lambda e: e[0].__name__, led_relay.effect_controller.effects)
     effects = { 'enabled_effects': list(effects) }
-    return jsonify(effects), 200
-    
+    return jsonify(effects), 200    
 
 if __name__ == '__main__':
     app.run(debug=True)
