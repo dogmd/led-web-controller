@@ -3,12 +3,21 @@ from flask import *
 import json
 import multiprocessing
 import led_relay
+import effect_controller
+import time
 
 app = Flask(__name__)
+
+def millis_time():
+    return int(round(time.time() * 1000))
 
 # Run the led_relay main loop and listen for commands
 def led_interface(commands, replies):
     print('LED worker started')
+    last_alert = millis_time()
+    start = millis_time()
+    desired_tps = 1 / effect_controller.DELAY
+    last_ticks = 0
     while True:
         command = ''
         if (not commands.empty()):
@@ -20,6 +29,16 @@ def led_interface(commands, replies):
             replies.put(enabled_effects)
         elif (command == 'stop'):
             break
+        
+        if (millis_time() - last_alert >= 1000):
+            actual_tps = led_relay.effect_controller.time - last_ticks
+            last_alert = millis_time()
+            last_ticks = led_relay.effect_controller.time
+            if (actual_tps < desired_tps * 0.95):
+                print('Running behind! Desired TPS: {}, Actual TPS: {}'.format(desired_tps, actual_tps))
+            else:
+                print('Desired TPS: {}, Actual TPS: {}'.format(desired_tps, actual_tps))
+
         led_relay.main()
 
 
@@ -53,7 +72,7 @@ if __name__ == '__main__':
     leds = multiprocessing.Process(target=led_interface, args=(commands, replies))
     leds.start()
     # Start Flask
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False, host='192.168.8.155', port='5000')
 
     commands.close()
     commands.join_thread()
