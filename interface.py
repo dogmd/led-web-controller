@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 # Run the led_relay main loop and listen for commands
 def led_interface(commands, replies):
+    print('LED worker started')
     while True:
         command = ''
         if (not commands.empty()):
@@ -52,8 +53,10 @@ if __name__ == '__main__':
     leds = multiprocessing.Process(target=led_interface, args=(commands, replies))
     leds.start()
     # Start Flask
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
 
     commands.close()
     commands.join_thread()
+    replies.close()
+    replies.join_thread()
     leds.join()
