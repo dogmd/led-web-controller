@@ -1,30 +1,6 @@
 import colorsys
 import random
-
-def lookup(name):
-    print(name)
-    if (name == 'solid-color'):
-        return solid
-    elif (name == 'rainbow'):
-        return rainbow
-    elif (name == 'snow'):
-        return snow
-    elif (name == 'runner'):
-        return runner
-    elif (name == 'patriot'):
-        return patriot
-    elif (name == 'custom'):
-        return custom
-    elif (name == 'wipe'):
-        return wipe
-    elif (name == 'twinkle'):
-        return twinkle
-    elif (name == 'breathe'):
-        return breathe
-    elif (name == 'blink'):
-        return blink
-    else:
-        return magenta
+import inspect
 
 def magenta(settings, time, pixels, pixel_settings):
     fill(pixels, (255, 0, 255))

@@ -2,18 +2,24 @@ import effects
 import json
 import colorsys
 import time
+import inspect
 
 DELAY = 0.005
 
 class EffectController:
     def __init__(self, num_pixels, settings_file='settings.json'):
         self.settings_file = settings_file
+
+        self.effect_list = inspect.getmembers(effects, inspect.isfunction)
+        self.effect_list = { f[0]: f[1] for f in self.effect_list }
+
         self.pixels = []
         for i in range(num_pixels):
             self.pixels.append((0, 0, 0))
+
         self.time = 0
         self.import_settings()
-        print(self.settings)
+
 
     def import_settings(self):
         self.effects = []
@@ -24,17 +30,25 @@ class EffectController:
             data = settings.read()
         self.settings = json.loads(data)
 
+        # Effect settings
         for effect_name, effect_settings in self.settings['effects'].items():
             effect_settings['tps'] = 1 / DELAY
             effect_settings['strand-length'] = 20
             if (effect_settings['selected'] == 'true'):
-                self.effects.append((effects.lookup(effect_name), effect_settings))
+                if (effect_name in self.effect_list):
+                    self.effects.append((self.effect_list[effect_name], effect_settings))
+                else:
+                    # Solid magenta strip is "error" state
+                    print('Error, {} effect was not found'.format(effect_name))
+                    self.effects.append((effects.magenta, effect_settings))
 
+        # Power settings
         self.brightness = float(self.settings['powerSettings']['brightness']) / 100
         if (self.settings['powerSettings']['isOn'] == 'false'):
             self.brightness = 0
 
     def step(self):
+        # Apply the effects
         for effect in self.effects:
             effect[0](effect[1], self.time, self.pixels, self.pixel_settings) # effect[0] is callback, effect[1] is effect settings
         self.apply_brightness()
@@ -45,6 +59,8 @@ class EffectController:
         time.sleep(DELAY)
         self.time += 1
 
+
+    # Reduce the brightness of rgb
     def apply_brightness(self):
         for i, color in enumerate(self.pixels):
             color = tuple(c / 255 for c in color)
