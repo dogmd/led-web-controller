@@ -9,6 +9,9 @@ def fill(pixels, color):
     for i in range(len(pixels)):
         pixels[i] = color
 
+def time2ticks(secs, tps):
+    return max(secs * tps, 1)
+
 def solid(settings, time, pixels, pixel_settings):
     color = (int(settings['red']), int(settings['green']), int(settings['blue']))
     fill(pixels, color)
@@ -30,7 +33,7 @@ def rainbow(settings, time, pixels, pixel_settings):
             pixels[i] = rgb
 
 def snow(settings, time, pixels, pixel_settings, twinkle=False, full_strip=False):
-    num_ticks = int(settings['tps']) * float(settings['duration'])
+    num_ticks = time2ticks(float(settings['duration']), int(settings['tps']))
     threshold = 0
     if (not full_strip):
         threshold = float(settings['frequency']) / num_ticks
@@ -80,7 +83,7 @@ def snow(settings, time, pixels, pixel_settings, twinkle=False, full_strip=False
 
 def runner(settings, time, pixels, pixel_settings, overwrite=True):
     color = (int(settings['red']), int(settings['green']), int(settings['blue']))
-    tpt = 1 / int(settings['speed']) * int(settings['tps'])
+    tpt = time2ticks(1 / int(settings['speed']), int(settings['tps']))
     length = int(settings['length'])
     head = (time // tpt) % len(pixels)
     tail = (head - length + len(pixels)) % len(pixels)
@@ -99,7 +102,7 @@ def runner(settings, time, pixels, pixel_settings, overwrite=True):
 def patriot(settings, time, pixels, pixel_settings):
     speed = int(settings['speed'])
     if (speed != 0):
-        tpt = 1 / int(settings['speed']) * int(settings['tps'])
+        tpt = time2ticks(1 / int(settings['speed']), int(settings['tps']))
         pos = (time // tpt) % len(pixels)
     else:
         pos = 0
@@ -138,7 +141,7 @@ def custom(settings, time, pixels, pixel_settings):
 
 def wipe(settings, time, pixels, pixel_settings):
     if (settings['full-strip'] == 'true'):
-        tpt = 1 / int(settings['speed']) * int(settings['tps'])
+        tpt = time2ticks(1 / int(settings['speed']), int(settings['tps']))
         pos = int((time // tpt) % len(pixels))
         color = (int(settings['red']), int(settings['green']), int(settings['blue']))
         if ('wipe' not in pixel_settings[-1]): # Grow the color wipe
@@ -165,15 +168,15 @@ def breathe(settings, time, pixels, pixel_settings):
     twinkle(settings, time, pixels, pixel_settings, 1 / float(settings['speed']), True)
 
 def blink(settings, time, pixels, pixel_settings):
-    off_ticks = float(settings['off-time']) * int(settings['tps'])
-    on_ticks = float(settings['on-time']) * int(settings['tps'])
+    off_ticks = time2ticks(float(settings['off-time']),int(settings['tps']))
+    on_ticks = time2ticks(float(settings['on-time']), int(settings['tps']))
     if ('blink' in pixel_settings[0]): # Strip is off
-        if (time >= pixel_settings[0]['blink'] + off_ticks):
+        if (time > pixel_settings[0]['blink'] + off_ticks):
             pixel_settings[0].pop('blink')
         else:
             for i in range(len(pixels)):
                 pixels[i] = (0, 0, 0)
 
     else:
-        if (time % on_ticks == 0):
+        if (time % (on_ticks + 1) == 0):
             pixel_settings[0]['blink'] = time

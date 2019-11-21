@@ -4,7 +4,7 @@ import colorsys
 import time
 import inspect
 
-DELAY = 0.005
+DELAY = 0.025 # 40 tps
 
 class EffectController:
     def __init__(self, num_pixels, settings_file='settings.json'):
@@ -17,12 +17,13 @@ class EffectController:
         for i in range(num_pixels):
             self.pixels.append((0, 0, 0))
 
+        self.last_time = int(round(time.time() * 1000))
         self.time = 0
         self.import_settings()
 
 
     def import_settings(self):
-        self.effects = []
+        self.enabled_effects = []
         self.pixel_settings = []
         for i in range(len(self.pixels)):
             self.pixel_settings.append({})
@@ -36,11 +37,11 @@ class EffectController:
             effect_settings['strand-length'] = 20
             if (effect_settings['selected'] == 'true'):
                 if (effect_name in self.effect_list):
-                    self.effects.append((self.effect_list[effect_name], effect_settings))
+                    self.enabled_effects.append((self.effect_list[effect_name], effect_settings))
                 else:
                     # Solid magenta strip is "error" state
                     print('Error, {} effect was not found'.format(effect_name))
-                    self.effects.append((effects.magenta, effect_settings))
+                    self.enabled_effects.append((effects.magenta, effect_settings))
 
         # Power settings
         self.brightness = float(self.settings['powerSettings']['brightness']) / 100
@@ -49,14 +50,18 @@ class EffectController:
 
     def step(self):
         # Apply the effects
-        for effect in self.effects:
+        for effect in self.enabled_effects:
             effect[0](effect[1], self.time, self.pixels, self.pixel_settings) # effect[0] is callback, effect[1] is effect settings
         self.apply_brightness()
         for ind in range(len(self.pixels)):
             color = self.pixels[ind]
             color = tuple(int(c) % 256 for c in color)
             self.pixels[ind] = color
-        time.sleep(DELAY)
+        
+        
+        time.sleep(max(0, DELAY - (int(round(time.time() * 1000)) - self.last_time) / 1000))
+        self.last_time = int(round(time.time() * 1000))
+        
         self.time += 1
 
 
