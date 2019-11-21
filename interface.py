@@ -6,7 +6,7 @@ import led_relay
 
 app = Flask(__name__)
 
-# Run the led_relay main loop and listen for settings updates
+# Run the led_relay main loop and listen for commands
 def led_interface(commands, replies):
     while True:
         command = ''
@@ -14,9 +14,9 @@ def led_interface(commands, replies):
             command = commands.get()
         if (command == 'update'):
             led_relay.update_settings()
-            effects = map(lambda e: e[0].__name__, led_relay.effect_controller.effects)
-            effects = { 'enabled_effects': list(effects) }
-            replies.put(effects)
+            enabled_effects = map(lambda e: e[0].__name__, led_relay.effect_controller.enabled_effects)
+            enabled_effects = { 'enabled_effects': list(enabled_effects) }
+            replies.put(enabled_effects)
         elif (command == 'stop'):
             break
         led_relay.main()
