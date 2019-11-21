@@ -4,7 +4,7 @@ import colorsys
 import time
 import inspect
 
-DELAY = 0.005
+DELAY = 0.025 # 40 tps
 
 class EffectController:
     def __init__(self, num_pixels, settings_file='settings.json'):
@@ -17,6 +17,7 @@ class EffectController:
         for i in range(num_pixels):
             self.pixels.append((0, 0, 0))
 
+        self.last_time = int(round(time.time() * 1000))
         self.time = 0
         self.import_settings()
 
@@ -56,7 +57,11 @@ class EffectController:
             color = self.pixels[ind]
             color = tuple(int(c) % 256 for c in color)
             self.pixels[ind] = color
-        time.sleep(DELAY)
+        
+        
+        time.sleep(max(0, DELAY - (int(round(time.time() * 1000)) - self.last_time) / 1000))
+        self.last_time = int(round(time.time() * 1000))
+        
         self.time += 1
 
 
