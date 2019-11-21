@@ -7,21 +7,20 @@ import led_relay
 app = Flask(__name__)
 
 # Run the led_relay main loop and listen for settings updates
-def led_interface(queue):
+def led_interface(commands, replies):
     while True:
         command = ''
-        if (not queue.empty()):
-            command = queue.get()
+        if (not commands.empty()):
+            command = commands.get()
         if (command == 'update'):
             led_relay.update_settings()
+            effects = map(lambda e: e[0].__name__, led_relay.effect_controller.effects)
+            effects = { 'enabled_effects': list(effects) }
+            replies.put(effects)
         elif (command == 'stop'):
             break
         led_relay.main()
 
-# Start the led worker child process
-queue = multiprocessing.Queue()
-leds = multiprocessing.Process(target=led_interface, args=(queue,))
-leds.start()
 
 @app.route('/settings/<effect_name>', methods=['GET'])
 def get_settings(effect_name):
@@ -40,15 +39,21 @@ def set_settings():
     with open('settings.json', 'w') as settings:
         settings.write(new_settings)
     # Tell the led worker to update its settings
-    queue.put('update')
+    commands.put('update')
+    enabled_effects = replies.get()
     # Get currently enabled effects
-    effects = map(lambda e: e[0].__name__, led_relay.effect_controller.effects)
-    effects = { 'enabled_effects': list(effects) }
-    return jsonify(effects), 200    
+    return jsonify(enabled_effects), 200    
+
 
 if __name__ == '__main__':
+    # Start the led worker child process
+    commands = multiprocessing.Queue()
+    replies = multiprocessing.Queue()
+    leds = multiprocessing.Process(target=led_interface, args=(commands, replies))
+    leds.start()
+    # Start Flask
     app.run(debug=True)
 
-    queue.close()
-    queue.join_thread()
+    commands.close()
+    commands.join_thread()
     leds.join()
